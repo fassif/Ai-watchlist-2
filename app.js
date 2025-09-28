@@ -1,4 +1,4 @@
-/* AI Watchlist PWA */
+/* AI Watchlist PWA - fixed fetch */ 
 const STORAGE_KEY = "ai_watchlist_csv";
 const SHEET_URL_KEY = "ai_watchlist_sheet_url";
 
@@ -92,18 +92,12 @@ function populateFilters() {
 }
 
 function parseCSV(text) {
-  return new Promise((resolve, reject)=>{
-    Papa.parse(text, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (res)=> resolve(res.data),
-      error: reject
-    });
-  });
+  const res = Papa.parse(text, {header:true, skipEmptyLines:true});
+  return res.data;
 }
 
 async function loadFromText(text, cache=true) {
-  const data = await parseCSV(text);
+  const data = parseCSV(text);
   rows = data;
   if (cache) localStorage.setItem(STORAGE_KEY, text);
   populateFilters();
@@ -111,8 +105,9 @@ async function loadFromText(text, cache=true) {
 }
 
 async function fetchSheet(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Fetch failed');
+  if (!/output=csv/i.test(url)) throw new Error("Not a CSV link (must end with output=csv)");
+  const res = await fetch(url, { mode: "cors", credentials: "omit" });
+  if (!res.ok) throw new Error("Fetch failed: " + res.status);
   return await res.text();
 }
 
@@ -130,13 +125,13 @@ els.filePicker.addEventListener('change', async (e)=>{
 
 els.loadSheet.addEventListener('click', async ()=>{
   const url = els.sheetUrl.value.trim();
-  if (!url) return alert("Paste a Google Sheet CSV URL");
+  if (!url) return alert("Paste a Google Sheet CSV link ending with output=csv");
   try {
     const text = await fetchSheet(url);
     localStorage.setItem(SHEET_URL_KEY, url);
     await loadFromText(text, true);
   } catch (e) {
-    alert("Couldn't load that URL. Make sure it's a public CSV link.");
+    alert("Couldn't load that URL. Make sure it's a public CSV link.\n\nError: " + e.message);
   }
 });
 
@@ -149,17 +144,16 @@ els.clearData.addEventListener('click', ()=>{
   alert("Cleared cached data.");
 });
 
-// Boot: try cache first, else load fallback sample
+// Boot
 (async function boot(){
   const cached = localStorage.getItem(STORAGE_KEY);
   if (cached) {
     await loadFromText(cached, false);
     const url = localStorage.getItem(SHEET_URL_KEY);
-    if (url) { // refresh in background
+    if (url) {
       fetchSheet(url).then(t=>loadFromText(t,true)).catch(()=>{});
     }
   } else {
-    // Minimal sample so UI isn't empty
     const sample = `Ticker,Name,Category,Thesis (1-liner),Key Catalysts,Risks,HQ Country
 PLTR,Palantir,Software—AI Platforms/Apps,Expanding AIP adoption (gov + commercial),AIP contracts; NRR>120%; margins,Pricing vs hyperscalers; overlap,USA
 CRDO,Credo,Infra—Connectivity/SerDes,SerDes/AECs for 800G→1.6T,Hyperscaler orders; 1.6T ramps,Concentration; competition,USA`;

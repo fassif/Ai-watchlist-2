@@ -1,5 +1,5 @@
 self.addEventListener('install', (e)=>{
-  e.waitUntil(caches.open('aiwl-v1').then(c=>c.addAll([
+  e.waitUntil(caches.open('aiwl-v2').then(c=>c.addAll([
     './','./index.html','./styles.css','./app.js','./papaparse.min.js','./manifest.json',
     './icons/icon-192.png','./icons/icon-512.png'
   ])));
