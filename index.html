@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <title>AI Watchlist</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>AI Watchlist</h1>
+    <button id="installBtn" hidden>Install</button>
+  </header>
+
+  <section class="controls">
+    <div class="row">
+      <input id="search" type="search" placeholder="Search (Ticker, Name, Thesis…)" autocomplete="off">
+    </div>
+    <div class="row">
+      <select id="categoryFilter"></select>
+      <select id="countryFilter"></select>
+    </div>
+    <div class="row">
+      <input id="sheetUrl" type="url" placeholder="Paste Google Sheet CSV URL (optional)">
+      <button id="loadSheet">Load</button>
+    </div>
+    <div class="row">
+      <input id="filePicker" type="file" accept=".csv">
+      <button id="clearData">Clear cached</button>
+    </div>
+  </section>
+
+  <section id="summary"></section>
+  <section id="tableWrap"></section>
+
+  <footer>
+    <p>Tip: In Safari, tap <strong>Share</strong> → <strong>Add to Home Screen</strong> to install.</p>
+  </footer>
+
+  <script src="papaparse.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
